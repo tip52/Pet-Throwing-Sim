@@ -33,7 +33,8 @@ local Network = require(game:GetService("ReplicatedStorage").Library.Client.Netw
 local Fire, Invoke = Network.Fire, Network.Invoke
 local InvokeHook = hookfunction(debug.getupvalue(Invoke, 1), function(...) return true end)
 local FireHook = hookfunction(debug.getupvalue(Fire, 1), function(...) return true end)
-local orbs = workspace:WaitForChild("__MAP"):WaitForChild("Interactive"):WaitForChild("Orbs")
+local orbs
+task.spawn(function() orbs = workspace:WaitForChild("__MAP"):WaitForChild("Interactive"):WaitForChild("Orbs") end)
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Yeet a Pet by Tip", "Ocean")
@@ -52,9 +53,11 @@ Section:NewToggle("Auto Launch", "Automatically launches for you", function(v)
 end)
 
 --#region trackers
-
-local orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
-local curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
+local orbAmt,curAmt ="0","0"
+task.spawn(function()
+orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
+curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
+end)
 local orblab = Section:NewLabel("Orb amount: "..orbAmt)
 local curlab = Section:NewLabel("Currency amount: "..curAmt)
 local Section = Tab:NewSection("Visual")
@@ -109,7 +112,7 @@ task.spawn(function()
         if getgenv().autoOrb then
             if #orbs:GetChildren() ~= 0 then -- not do the whole thing unless thingy spawned
                 for _,v in pairs(orbs:GetChildren()) do -- could make this more potato pc friendly but was too lazy
-                    v.Orb.CFrame = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame -- collect all orbs (this works because you are network owner LOL)
+                    task.spawn(function() v.Orb.CFrame = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame end) -- collect all orbs (this works because you are network owner LOL)
                     Fire("Yeet: Claim Orbs",v.Name) -- not even needed lmfao
             end
             end

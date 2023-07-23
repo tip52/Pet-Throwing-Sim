@@ -1,3 +1,6 @@
+
+--#region var1
+
 getgenv().autoOrb = false
 getgenv().autoLaunch = false
 getgenv().autoView = false
@@ -8,6 +11,8 @@ getgenv().hatch = false
 getgenv().EggName = nil
 getgenv().tpToEgg = false
 local newName
+--#endregion
+
 for i,v in pairs(game.CoreGui:GetChildren()) do
     if v:FindFirstChild("Main") and v.Main:FindFirstChild("MainHeader") and v.Main:FindFirstChild("pages") then
         v:Destroy()
@@ -22,6 +27,7 @@ task.spawn(function()
     end)
 end)
 
+--#region var2
 
 local Network = require(game:GetService("ReplicatedStorage").Library.Client.Network)
 local Fire, Invoke = Network.Fire, Network.Invoke
@@ -35,26 +41,38 @@ local News = Window:NewTab("News")
 local Tab = Window:NewTab("Main")
 local Eggs = Window:NewTab("Eggs")
 local Section = Tab:NewSection("Farming")
+--#endregion
+
 Section:NewToggle("Auto Orb", "Auto collects orbs", function(v)
     getgenv().autoOrb = v
 
 end)
 Section:NewToggle("Auto Launch", "Automatically launches for you", function(v)
     getgenv().autoLaunch = v
-
 end)
 
+--#region trackers
+
+local orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
+local curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
+local orblab = Section:NewLabel("Orb amount: "..orbAmt)
+local curlab = Section:NewLabel("Currency amount: "..curAmt)
 local Section = Tab:NewSection("Visual")
+
+--#endregion
+
 Section:NewToggle("View character", "Views character when on", function(v)
     getgenv().autoView = v
 end)
-
+--#region labels
 local NewsSection = News:NewSection("News")
 NewsSection:NewLabel("- Made view character better")
 NewsSection:NewLabel("- Added anti afk")
 NewsSection:NewLabel("- Added auto open egg stuff")
 NewsSection:NewLabel("- Now deletes previous uis when executing")
+NewsSection:NewLabel("- Added orb and currency counter")
 NewsSection:NewLabel("Script by Tip, enjoy ;)")
+--#endregion
 
 local EggSec = Eggs:NewSection("Hatching")
 
@@ -74,7 +92,7 @@ EggSec:NewDropdown("Gold Eggs", "Gold Eggs", {"Golden Jetpack Egg", "Golden Fire
     getgenv().EggName = v
 end)
 
-EggSec:NewDropdown("Hatch Mode", "DropdownInf", {"Single", "Triple", "Octuple"}, function(v)
+EggSec:NewDropdown("Hatch Mode", "select hatch mode", {"Single", "Triple", "Octuple"}, function(v)
     if v == "Single" then
         getgenv().triple,getgenv().octuple = false,false
     elseif v == "Triple" then
@@ -132,7 +150,7 @@ end)
 task.spawn(function()
     while task.wait() do -- loop
         if getgenv().hatch and getgenv().EggName ~= nil then
-            --#region egg tp
+       
             if getgenv().tpToEgg then
                 local EggsFolder = workspace:WaitForChild("__MAP"):FindFirstChild("Eggs")
                 newName = getgenv().EggName
@@ -146,9 +164,21 @@ task.spawn(function()
                         end
                     end
                 end
-                --#endregion
+            
             end
             Invoke("Buy Egg",getgenv().EggName,getgenv().triple,getgenv().octuple)
     end
     end
 end)
+
+task.spawn(function()
+    while task.wait() do
+        if orbAmt ~= game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text then
+            orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
+            orblab:UpdateLabel("Orb amount: "..orbAmt)
+        elseif curAmt ~= game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text then
+            curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
+            curlab:UpdateLabel("Currency amount: "..curAmt)
+        end
+    end
+    end)

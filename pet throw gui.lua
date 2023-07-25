@@ -1,5 +1,9 @@
 
 --#region var1
+repeat task.wait() until game:IsLoaded() and game:GetService("ReplicatedStorage"):FindFirstChild("Library") and game.Players.LocalPlayer and game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main") and game.Players.LocalPlayer.PlayerGui.Main:FindFirstChild("Right") and game.Players.LocalPlayer.Character
+print("loaded")
+
+
 
 getgenv().autoOrb = false
 getgenv().autoLaunch = false
@@ -20,10 +24,11 @@ for i,v in pairs(game.CoreGui:GetChildren()) do
 end
 
 task.spawn(function()
-    local VirtualUser = game:service 'VirtualUser'
+
     game.Players.LocalPlayer.Idled:connect(function()
-        VirtualUser:CaptureController()
-        VirtualUser:ClickButton2(Vector2.new())
+        game:GetService("VirtualInputManager"):SendKeyEvent(true, "W", false, game)
+     wait()
+    game:GetService("VirtualInputManager"):SendKeyEvent(false, "W", false, game)
     end)
 end)
 
@@ -33,8 +38,6 @@ local Network = require(game:GetService("ReplicatedStorage").Library.Client.Netw
 local Fire, Invoke = Network.Fire, Network.Invoke
 local InvokeHook = hookfunction(debug.getupvalue(Invoke, 1), function(...) return true end)
 local FireHook = hookfunction(debug.getupvalue(Fire, 1), function(...) return true end)
-local orbs
-task.spawn(function() orbs = workspace:WaitForChild("__MAP"):WaitForChild("Interactive"):WaitForChild("Orbs") end)
 
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("Yeet a Pet by Tip", "Ocean")
@@ -110,8 +113,8 @@ end)
 task.spawn(function()
     while task.wait() do -- loop
         if getgenv().autoOrb then
-            if #orbs:GetChildren() ~= 0 then -- not do the whole thing unless thingy spawned
-                for _,v in pairs(orbs:GetChildren()) do -- could make this more potato pc friendly but was too lazy
+            if #workspace:WaitForChild("__MAP"):WaitForChild("Interactive"):WaitForChild("Orbs"):GetChildren() ~= 0 then -- not do the whole thing unless thingy spawned
+                for _,v in pairs(workspace:WaitForChild("__MAP"):WaitForChild("Interactive"):WaitForChild("Orbs"):GetChildren()) do -- could make this more potato pc friendly but was too lazy
                     task.spawn(function() v.Orb.CFrame = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame end) -- collect all orbs (this works because you are network owner LOL)
                     Fire("Yeet: Claim Orbs",v.Name) -- not even needed lmfao
             end
@@ -123,7 +126,8 @@ task.spawn(function()
     while task.wait() do -- loop
         if getgenv().autoLaunch then
             local plr = game.Players.LocalPlayer
-            local chr = plr.Character
+            local chr
+            repeat task.wait() chr = plr.Character until chr ~= nil
             local hum = chr:WaitForChild("HumanoidRootPart")
             hum.CFrame = CFrame.new(6727.01953, -16.339798, -869.642334, -0.0522250049, -1.02990164e-07, 0.998635352, 3.01589438e-08, 1, 1.04708107e-07, -0.998635352, 3.55861687e-08, -0.0522250049)
             task.wait(0.3)
@@ -137,7 +141,8 @@ task.spawn(function()
         if getgenv().autoView then
             local camera = workspace.CurrentCamera
             local plr = game.Players.LocalPlayer
-            local chr = plr.Character
+            local chr
+            repeat task.wait() chr = plr.Character until chr ~= nil
             local hum = chr:WaitForChild("Humanoid")
             if camera.CameraSubject ~= hum then
                 camera.CameraSubject = hum

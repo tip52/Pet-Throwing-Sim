@@ -112,15 +112,6 @@ EggSec:NewToggle("Start Hatching", "Auto hatches", function(v)
     getgenv().hatch = v
 end)
 
-EggSec:NewToggle("Hatch when insane luck", "Hatches during insane luck and stops after it ends", function(v)
-    getgenv().insanehatch = v
-
-end)
-
-EggSec:NewToggle("Hatch when super luck", "Hatches during super luck and stops after it ends", function(v)
-    getgenv().luckyhatch = v
-end)
-
 EggSec:NewToggle("Tp to egg", "Teleports to egg", function(v)
     getgenv().tpToEgg = v
 end)

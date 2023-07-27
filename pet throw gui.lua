@@ -14,7 +14,11 @@ getgenv().octuple = false
 getgenv().hatch = false
 getgenv().EggName = nil
 getgenv().tpToEgg = false
-local newName
+getgenv().insanehatch = false
+getgenv().luckyhatch = false
+local newName,insaneLuck,superLuck = nil,false,false
+local wasHatch,wasLaunch,wasTp = false, false, false
+local lib= require(game.ReplicatedStorage.Library)
 --#endregion
 
 for i,v in pairs(game.CoreGui:GetChildren()) do
@@ -25,12 +29,35 @@ end
 
 task.spawn(function()
 
-    game.Players.LocalPlayer.Idled:connect(function()
-        game:GetService("VirtualInputManager"):SendKeyEvent(true, "W", false, game)
-     wait()
-    game:GetService("VirtualInputManager"):SendKeyEvent(false, "W", false, game)
-    end)
+        game.Players.LocalPlayer.Idled:connect(function()
+            game:GetService("VirtualInputManager"):SendKeyEvent(true, "W", false, game)
+            wait()
+            game:GetService("VirtualInputManager"):SendKeyEvent(false, "W", false, game)
+        end)
 end)
+
+local function IsBoost(boost)
+    local boosts = {
+        "Insane Luck",
+        "Triple Damage",
+        "Super Lucky"
+    }
+    local inTable = table.find(boosts,boost)
+    assert(inTable,"Boost not found")
+    local boostFound = false
+    for i,v in pairs(lib.ServerBoosts.GetActiveBoosts()) do
+        if i == boost then
+
+            for i,v in pairs(v) do
+                if i == "totalTimeLeft" and v ~= 0 then
+                    boostFound = true
+                    _G.time = v
+                end
+            end
+        end
+    end
+    return boostFound
+end
 
 --#region var2
 
@@ -58,8 +85,8 @@ end)
 --#region trackers
 local orbAmt,curAmt ="0","0"
 task.spawn(function()
-orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
-curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
+    orbAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Orbs").Amount.Text
+    curAmt = game.Players.LocalPlayer.PlayerGui.Main.Right:WaitForChild("Yeet Coins").Amount.Text
 end)
 local orblab = Section:NewLabel("Orb amount: "..orbAmt)
 local curlab = Section:NewLabel("Currency amount: "..curAmt)
@@ -72,18 +99,26 @@ Section:NewToggle("View character", "Views character when on", function(v)
 end)
 --#region labels
 local NewsSection = News:NewSection("News")
-NewsSection:NewLabel("- Made view character better")
-NewsSection:NewLabel("- Added anti afk")
-NewsSection:NewLabel("- Added auto open egg stuff")
-NewsSection:NewLabel("- Now deletes previous uis when executing")
-NewsSection:NewLabel("- Added orb and currency counter")
+NewsSection:NewLabel("- Added hatch when insane luck")
+NewsSection:NewLabel("- Added hatch when super lucky")
 NewsSection:NewLabel("Script by Tip, enjoy ;)")
 --#endregion
+
+
 
 local EggSec = Eggs:NewSection("Hatching")
 
 EggSec:NewToggle("Start Hatching", "Auto hatches", function(v)
     getgenv().hatch = v
+end)
+
+EggSec:NewToggle("Hatch when insane luck", "Hatches during insane luck and stops after it ends", function(v)
+    getgenv().insanehatch = v
+
+end)
+
+EggSec:NewToggle("Hatch when super luck", "Hatches during super luck and stops after it ends", function(v)
+    getgenv().luckyhatch = v
 end)
 
 EggSec:NewToggle("Tp to egg", "Teleports to egg", function(v)
@@ -158,7 +193,7 @@ end)
 task.spawn(function()
     while task.wait() do -- loop
         if getgenv().hatch and getgenv().EggName ~= nil then
-       
+
             if getgenv().tpToEgg then
                 local EggsFolder = workspace:WaitForChild("__MAP"):FindFirstChild("Eggs")
                 newName = getgenv().EggName
@@ -172,7 +207,7 @@ task.spawn(function()
                         end
                     end
                 end
-            
+
             end
             Invoke("Buy Egg",getgenv().EggName,getgenv().triple,getgenv().octuple)
     end
@@ -189,4 +224,131 @@ task.spawn(function()
             curlab:UpdateLabel("Currency amount: "..curAmt)
         end
     end
-    end)
+end)
+
+
+task.spawn(function()
+    while task.wait() do
+        if getgenv().insanehatch then
+    
+        if IsBoost("Insane Luck") then
+           
+            if getgenv().hatch then
+                wasHatch = true
+            elseif getgenv().autoLaunch then
+                wasLaunch = true
+            elseif getgenv().tpToEgg then
+                wasTp = true
+            end
+            getgenv().hatch = true
+            getgenv().autoLaunch = false
+            getgenv().tpToEgg = true
+            insaneLuck = true
+
+        else
+            if insaneLuck then
+                if wasHatch then
+                    wasHatch = false
+                    getgenv().hatch = true
+                else
+                    wasHatch = false
+                    getgenv().hatch = false
+                end
+
+
+                if wasTp then
+                    wasTp = false
+                    getgenv().tpToEgg = true
+                else
+                    wasTp = false
+                    getgenv().tpToEgg = false
+                end
+
+
+                if wasLaunch then
+                    wasLaunch = false
+                    getgenv().autoLaunch = true
+                end
+
+
+                insaneLuck = false
+            end
+        end
+    else
+        if insaneLuck then
+            getgenv().hatch = false
+        end
+    end
+
+
+end
+end )
+
+task.spawn(function ()
+
+    while task.wait() do
+        if getgenv().luckyhatch then
+            
+        if IsBoost("Super Lucky") then
+        
+            if getgenv().hatch then
+                wasHatch = true
+            elseif getgenv().autoLaunch then
+                wasLaunch = true
+            elseif getgenv().tpToEgg then
+                wasTp = true
+            end
+            getgenv().hatch = true
+            getgenv().autoLaunch = false
+            getgenv().tpToEgg = true
+            superLuck = true
+
+        else
+
+
+            if superLuck then
+                if wasHatch then
+                    wasHatch = false
+                    getgenv().hatch = true
+                else
+                    wasHatch = false
+                    getgenv().hatch = false
+                end
+
+
+                if wasTp then
+                    wasTp = false
+                    getgenv().tpToEgg = true
+                else
+                    wasTp = false
+                    getgenv().tpToEgg = false
+                end
+
+
+                if wasLaunch then
+                    wasLaunch = false
+                    getgenv().autoLaunch = true
+                end
+
+
+                superLuck = false
+            end
+
+
+        end
+
+
+    else
+        if superLuck then
+            getgenv().hatch = false
+        end
+    end
+
+
+
+
+
+
+end
+    
+end)
